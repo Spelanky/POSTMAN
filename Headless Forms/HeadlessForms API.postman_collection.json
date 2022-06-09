@@ -1,0 +1,448 @@
+{
+	"info": {
+		"_postman_id": "2c7c8c22-343b-4eb5-9050-89efd98fd6e4",
+		"name": "HeadlessForms API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17406426"
+	},
+	"item": [
+		{
+			"name": "Form Submission via JSON",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Checking the response code for successful status\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(`200 OK`, () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Status: ${jsonData.status}`,() => {\r",
+							"  pm.expect(jsonData.status).to.eql(200)\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Message: ${jsonData.message}`,() => {\r",
+							"  pm.expect(jsonData.message).to.eql(\"Submission stored\")\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Error: ${jsonData.error}`,() => {\r",
+							"  pm.expect(jsonData.error).to.eql(null)\r",
+							"});\r",
+							"\r",
+							"// Время респронса в зависимости от количества юзеров, которым отправляем условно емейлы может быть много и сначала идет респонс, а потом все процессы. Юзер не должен ждать ответа долго, даже если там сотня емейлов.\r",
+							"pm.test(\"Response time is less than 300ms\", () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(300);\r",
+							"});\r",
+							"console.log(`Response Time: ${pm.response.responseTime}`);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let name = pm.collectionVariables.replaceIn('{{$randomFullName}}');\r",
+							"let email = pm.collectionVariables.replaceIn('{{$randomEmail}}');\r",
+							"pm.collectionVariables.set('name', name);\r",
+							"pm.collectionVariables.set('email', email);\r",
+							"\r",
+							"// console.log(name);\r",
+							"// console.log(email);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "'NeF:GVv()Jn49dG",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "dev_headless",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "https://spelanky.github.io/",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"message\": \"{{message}}\"\r\n}"
+				},
+				"url": {
+					"raw": "{{hf_host}}/api/v1/form-submission/{{FORM_TOKEN}}",
+					"host": [
+						"{{hf_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"form-submission",
+						"{{FORM_TOKEN}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Form Submission via JSON with validation rules",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Checking the response code for successful status\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(`200 OK`, () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Status: ${jsonData.status}`,() => {\r",
+							"  pm.expect(jsonData.status).to.eql(200)\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Message: ${jsonData.message}`,() => {\r",
+							"  pm.expect(jsonData.message).to.eql(\"Submission stored\")\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Error: ${jsonData.error}`,() => {\r",
+							"  pm.expect(jsonData.error).to.eql(null)\r",
+							"});\r",
+							"\r",
+							"// Время респронса в зависимости от количества юзеров, которым отправляем условно емейлы может быть много и сначала идет респонс, а потом все процессы. Юзер не должен ждать ответа долго, даже если там сотня емейлов.\r",
+							"pm.test(\"Response time is less than 300ms\", () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(300);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let name = pm.collectionVariables.replaceIn('{{$randomFullName}}');",
+							"let email = pm.collectionVariables.replaceIn('{{$randomEmail}}');",
+							"pm.collectionVariables.set('name', name);",
+							"pm.collectionVariables.set('email', email);",
+							"",
+							"// console.log(name);",
+							"// console.log(email);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "'NeF:GVv()Jn49dG",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "dev_headless",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "https://spelanky.github.io/",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"message\": \"{{message}}\",\r\n    \"_validation\": {\r\n    \t\"email\": [\r\n    \t\t\"required\",\r\n    \t\t\"email\",\r\n    \t\t\"min:300\"\r\n    \t\t\r\n    \t],\r\n    \t\"name\": [\r\n    \t\t\"required\",\r\n    \t\t\"min:3\"\r\n    \t\t\r\n\t\t],\r\n        \"message\": [\r\n    \t\t\"required\",\r\n            \"message\",\r\n    \t\t\"min:3\"\r\n    \t\t\r\n    \t]\r\n    },\r\n    \"_validation_messages\": {\r\n    \t\"email\": {\r\n    \t\t\"type\": \"Incorrect email address\",\r\n    \t\t\"required\": \"Missing custom :attribute attribute!\"\r\n    \t},\r\n    \t\"name\": {\r\n    \t\t\"required\": \"You forget to enter :attribute\",\r\n    \t\t\"min\":  \"Should be minimum :min letters\"\r\n    \t},\r\n        \"message\": {\r\n    \t\t\"required\": \"You forget to enter :attribute\",\r\n    \t\t\"min\":  \"Should be minimum :min letters\"\r\n    \t}\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{hf_host}}/api/v1/form-submission/{{FORM_TOKEN}}",
+					"host": [
+						"{{hf_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"form-submission",
+						"{{FORM_TOKEN}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Form Submission via JSON with validation rules #2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Checking the response code for successful status\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(`200 OK`, () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Status: ${jsonData.status}`,() => {\r",
+							"  pm.expect(jsonData.status).to.eql(200)\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Message: ${jsonData.message}`,() => {\r",
+							"  pm.expect(jsonData.message).to.eql(\"Submission stored\")\r",
+							"});\r",
+							"\r",
+							"pm.test(`Response Error: ${jsonData.error}`,() => {\r",
+							"  pm.expect(jsonData.error).to.eql(null)\r",
+							"});\r",
+							"\r",
+							"// Время респронса в зависимости от количества юзеров, которым отправляем условно емейлы может быть много и сначала идет респонс, а потом все процессы. Юзер не должен ждать ответа долго, даже если там сотня емейлов.\r",
+							"pm.test(\"Response time is less than 300ms\", () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(300);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let name = pm.collectionVariables.replaceIn('{{$randomFullName}}');",
+							"let email = pm.collectionVariables.replaceIn('{{$randomEmail}}');",
+							"pm.collectionVariables.set('name', name);",
+							"pm.collectionVariables.set('email', email);",
+							"",
+							"// console.log(name);",
+							"// console.log(email);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "'NeF:GVv()Jn49dG",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "dev_headless",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "https://spelanky.github.io/",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"kghkgh\",\r\n    \"email\": \"em\",\r\n    \"_validation\": {\r\n    \t\"email\": [\r\n    \t\t\"required\",\r\n    \t\t\"email\",\r\n    \t\t\"min:300\"\r\n    \t],\r\n    \t\"name\": [\r\n    \t\t\"required\",\r\n    \t\t\"min:3\"\r\n\t\t]\r\n    },\r\n    \"_validation_messages\": {\r\n    \t\"email\": {\r\n    \t\t\"type\": \"Incorrect email address\",\r\n    \t\t\"required\": \"Missing custom :attribute\"\r\n    \t},\r\n    \t\"name\": {\r\n    \t\t\"required\": \"You forget to enter :attribute\",\r\n    \t\t\"min\":  \"Should be minimum :min letters\"\r\n    \t}\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{hf_host}}/api/v1/form-submission/{{FORM_TOKEN}}",
+					"host": [
+						"{{hf_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"form-submission",
+						"{{FORM_TOKEN}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Form Submissions List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Checking the response code for successful status //\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Checking that the correct message is returned //\r",
+							"pm.test(`Response message: ${jsonData.message}`, () => {\r",
+							"    pm.expect(jsonData.message).to.eql(\"Submission List\");\r",
+							"});\r",
+							"\r",
+							"// pm.test(\"Submission List recieved\", () => {\r",
+							"//     pm.expect(jsonData.message).to.eql(\"Submission List\");\r",
+							"// });\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{hf_host}}/api/v1/form-submission/{{FORM_TOKEN}}",
+					"host": [
+						"{{hf_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"form-submission",
+						"{{FORM_TOKEN}}"
+					],
+					"query": [
+						{
+							"key": "api_token",
+							"value": "{{API_TOKEN}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "in",
+				"value": "query",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{API_TOKEN}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "api_token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "message",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

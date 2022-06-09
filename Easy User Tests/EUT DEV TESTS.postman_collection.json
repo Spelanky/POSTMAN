@@ -1,0 +1,870 @@
+{
+	"info": {
+		"_postman_id": "e53d239b-03ed-4c17-a74e-9da729d0b2fb",
+		"name": "EUT DEV TESTS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17406426"
+	},
+	"item": [
+		{
+			"name": "[REG] Register User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//let name = pm.collectionVariables.replaceIn('{{$randomFullName}}');",
+							"//pm.collectionVariables.set('name', name);",
+							"//console.log(name);",
+							"",
+							"let email = pm.collectionVariables.replaceIn('{{$randomEmail}}');",
+							"pm.collectionVariables.set('email_reg', email);",
+							"",
+							"console.log(\"Created Email: \" + email);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200)});",
+							"",
+							"pm.test(\"Registration successful\", () => {",
+							"    pm.expect(jsonData.status).to.eql(200)",
+							"    pm.expect(jsonData.user).to.be.an(\"object\").that.has.all.keys(\"id\", \"name\", \"email\");",
+							"    pm.expect(jsonData.user.id).to.be.a(\"number\");",
+							"    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get('email_reg'));",
+							"});",
+							"",
+							"pm.collectionVariables.set(\"eut_reg_bearer_token\", jsonData.token);",
+							"pm.test('Token placed to collection variable \"eut_reg_bearer_token\"');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "ETR2Yq9iqHDg2riiGZkM",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "freihandlabor_eut",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{email_reg}}\",\n    \"password\": \"{{password}}\",\n    \"terms\": \"true\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/register",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[REG] Login with New Registration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Распарсили JSON",
+							"const jsonData = pm.response.json();",
+							"const statuscode = jsonData.status",
+							"console.log(jsonData);",
+							"",
+							"if (pm.response.to.have.status(200) && jsonData.status == 200) {",
+							"console.log(\"УСЛОВИЕ №1 (if) - 'status 200' выполнилось\");",
+							"",
+							"    pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200);});",
+							"    ",
+							"    pm.test(\"Login successful\", function () {",
+							"        pm.expect(jsonData.status).to.eql(200) &&",
+							"        pm.expect(jsonData.user.email).to.eql(pm.environment.get('email_reg')) &&",
+							"        pm.expect(jsonData.user.id).to.be.a('number');",
+							"});",
+							"    pm.test(\"Token value is not empty\", function () {",
+							"        pm.expect(jsonData.token).to.be.a('string').and.not.be.null;",
+							"        //pm.expect(jsonData.token).not.eql(null) && jsonData.token !=='';",
+							"        pm.collectionVariables.set(\"eut_log_bearer_token\", jsonData.token);",
+							"    pm.test('Token placed to collection variable \"eut_log_bearer_token\"');",
+							"});",
+							"} else if (jsonData.to.have.status(200) && jsonData.status == 422){",
+							"console.log(\"УСЛОВИЕ №2 (else if) - 422 THROTTLING\");",
+							"//Status в теле ответа всегда будет !=200, т.к. условие 'else' сработало: проверить на код не 200 для Fail статуса теста ",
+							"    pm.test(\"Status code is 200. Login and Password is correct\", function () {",
+							"        jsonData.to.have.status(200);",
+							"    });",
+							"",
+							"// Тест при троттлинге на выбор ",
+							"    // Test #1",
+							"    pm.test(\"Status code in Response Body: \" + statuscode + \" - THROTTLING process\", () => {",
+							"        //pm.response.json().status == 200;",
+							"        //pm.expect(pm.response.json().message).not.to.eql(\"Wrong email or password\");",
+							"        //pm.expect(jsonData.status).to.eql(200);       ",
+							"    })",
+							"    // Test #2",
+							"    pm.test(\"Login and Password is correct -->>\" + \" \" + jsonData.message, () => {})",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "ETR2Yq9iqHDg2riiGZkM",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "freihandlabor_eut",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{email_reg}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/login",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login with Existed User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Распарсили JSON",
+							"const jsonData = pm.response.json();",
+							"const statuscode = jsonData.status",
+							"//",
+							"if (pm.response.to.have.status(200) && pm.response.json().status === 200) {",
+							"console.log(\"УСЛОВИЕ №1 (if) - '200 LOGGED IN'\");",
+							"    pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200);})",
+							"",
+							"    pm.test(\"Login successful\", function () {",
+							"        pm.expect(jsonData.status).to.eql(200)",
+							"        pm.expect(jsonData.user).to.be.an(\"object\").that.has.all.keys(\"id\", \"name\", \"email\");",
+							"        pm.expect(jsonData.user.id).to.be.a(\"number\");",
+							"        pm.expect(jsonData.user.name).to.be.a(\"string\");",
+							"        pm.expect(jsonData.user.email).to.deep.eql(pm.environment.get(\"email_log\"));",
+							"});",
+							"//console.log(jsonData.user)",
+							"",
+							"    pm.test(\"Token value is not empty \\n\" + \"and placed to collection variable 'eut_log_bearer_token'\", function() {",
+							"        pm.expect(jsonData.token).to.be.a('string')",
+							"        pm.expect(jsonData.token).not.eql(null);",
+							"        pm.collectionVariables.set(\"eut_log_bearer_token\", jsonData.token);",
+							"    });",
+							"",
+							"// Status в Body Respons-a всегда будет !==200, т.к. условие 'else if' сработало: проверить на код самого ответа не 200 для Fail статуса теста",
+							"} else if ",
+							"    (pm.response.to.have.status(200) && jsonData.status == 422){",
+							"// console.log(\"УСЛОВИЕ №2 (else if) + 422 THROTTLING. \\n\" + pm.response.json().message);",
+							"console.log(`УСЛОВИЕ №2 (else if) + 422 THROTTLING.",
+							"    ${pm.response.json().message}`);",
+							"    ",
+							"    pm.test(\"Status code is 200. Login and Password is correct\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"    // Тест при троттлинге на выбор ",
+							"    // Test #1",
+							"    pm.test(`Test #1: Status code in Response Body: ${statuscode} - THROTTLING process`, () => {})",
+							"",
+							"    // Test #2",
+							"    pm.test(`Test #2: -->> ${pm.response.json().message}`, () => {",
+							"        pm.response.json().status == 200;",
+							"        pm.expect(pm.response.json().message).not.to.eql(\"Wrong email or password\");",
+							"        pm.expect(jsonData.status).to.eql(422);  ",
+							"        pm.expect(jsonData).to.have.property(\"message\")",
+							"    })",
+							"} else {",
+							"    pm.test(`Unusual situation. Response Body status: ${statuscode}`)",
+							"    console.log(`Response Body contains unusual`)",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "ETR2Yq9iqHDg2riiGZkM",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "freihandlabor_eut",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{email_log}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/login",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status: 200 OK\", () => {pm.response.to.have.status(200)});",
+							"",
+							"pm.test(`Name changed to ${jsonData.profile.name}`), () => {",
+							"    pm.expect(jsonData.profile.name).to.deep.eql(pm.environment.get(\"name\"))};",
+							"",
+							"// Меняем Email на такой же. Если регистрация - сменить переменную \"email_log\" на \"email_reg\" в env",
+							"pm.test(\"Email changed (to same one)\"), () => {",
+							"    pm.expect(jsonData.profile.email).to.eql(pm.environment.get(\"email_log\"))};",
+							"",
+							"// Должны получить уведомление на Email о смене пароля",
+							"pm.test(`Password changed (to same one)`), () => {",
+							"    pm.expect(jsonData.profile.has_password).to.be(true)};",
+							"",
+							"pm.test(`Status code in Response Body: ${jsonData.status}`);",
+							"",
+							"console.log(`Name changed: ${jsonData.profile.name}`);",
+							"console.log(`Email changed: ${jsonData.profile.email}`);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"current_password\": \"{{password}}\",\n\"email\": \"{{email_log}}\",\n\"name\": \"{{name}}\",\n\"new_password\": \"{{password}}\",\n\"new_password_confirmation\": \"{{password}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/user/me",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Test-IMG",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// If both URL and Attachment are filled at the same time Attachment image would be taken to the next step and URL would be ignored",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200)});",
+							"",
+							"pm.test(\"Test created.  ID: \" + jsonData.test.id, function() {",
+							"    pm.expect(jsonData.test).to.have.property('id');",
+							"    pm.expect(jsonData.test.id).to.be.an('number');",
+							"});",
+							"https://dev.easyusertest.com/api/v1/tests/414/image",
+							"// Correct image upload tests",
+							"//Если img загрузится некорректно, то image_url будет иметь значение null. Если там не null, то загрузка img прошла успешно",
+							"// Проверяем наличие 3-х других загруженных img",
+							"pm.test(\"Test image uploaded\", function() {",
+							"pm.expect(jsonData.test.image_url).not.eql(null)",
+							"pm.expect(jsonData.test.images.original).contain('original')",
+							"pm.expect(jsonData.test.images.thumbnail).contain('thumbnail')",
+							"pm.expect(jsonData.test.images.preview).contain('preview')",
+							"});",
+							"console.log('Created Test with ID:__' + jsonData.test.id + '__')",
+							"",
+							"//ADD SCHEMA VALIDATION++++++++++++++++++=",
+							"",
+							"// Creating variables",
+							"pm.collectionVariables.set(\"hash\", jsonData.test.hash);",
+							"pm.test('\"hash\" variable created');",
+							"pm.collectionVariables.set(\"test_id_img\", jsonData.test.id);",
+							"pm.test('\"test_id_img\" variable created');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"contentType": "image/png",
+							"type": "file",
+							"src": "frompostman.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/tests",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[DOUBLE] Get Created Test by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const teststatus = jsonData.test.status",
+							"",
+							"pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200)});",
+							"",
+							"// Test: Key \"message\" should not be in sucess response body ",
+							"pm.test(\"No error message\", () => {",
+							"    pm.expect(pm.response.text()).to.not.include(\"message\");",
+							"});",
+							"",
+							"// Проверка на статус необязательна, тест может быть уже active",
+							"pm.test(`Test -- #${jsonData.test.id} / Status -- '${jsonData.test.status}'`, () => {",
+							"    pm.expect(jsonData.test.status).eql('draft')",
+							"// Collection variables always return as 'string'. Need to parse in integer using 'parseInt' method",
+							"    pm.expect(jsonData.test.id).to.eql(parseInt(pm.collectionVariables.get('test_id_img')));",
+							"});",
+							"",
+							"// Correct image upload tests",
+							"pm.test(\"IMG uploaded successfuly\", () => {",
+							"    pm.expect(jsonData.test.image_url).not.eql(null)",
+							"// Засовываем в масиив ключи объекта images",
+							"let arr = []",
+							"for(const key in jsonData.test.images){arr.push(key)}",
+							"// Проверяем наличие ключей в JSON Response в объекте 'images'. Перебераем массив на предмет наличия каждого ключа из массива в Response.",
+							"arr.forEach((el) => {",
+							"    pm.test(`Response has object 'images' with '${el}' key not null`, () => {",
+							"        pm.expect(jsonData.test.images).to.have.property(el).that.have.to.be.a('string')",
+							"    })",
+							"})",
+							"});",
+							"",
+							"//Checking test hash in Response",
+							"pm.test(`Test hash is correct`, () => {",
+							"    pm.expect(jsonData.test.hash).eql(pm.collectionVariables.get('hash'))",
+							"});",
+							"",
+							"/*",
+							"var schema = {",
+							"  ",
+							"  \"type\": \"object\",",
+							"  \"properties\": {",
+							"    \"test\": {",
+							"      \"type\": \"object\",",
+							"      \"properties\": {",
+							"        \"id\": {",
+							"          \"type\": \"integer\"",
+							"        },",
+							"        \"age_ranges_id\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"status\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"url\": {",
+							"          \"type\": [\"string\", \"null\"]",
+							"        },",
+							"        \"predefined_panel_id\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"own_testers\": {",
+							"          \"type\": \"integer\"",
+							"        },",
+							"        \"package_id\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"testers_cnt\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"hash\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"progress\": {",
+							"          \"type\": \"integer\"",
+							"        },",
+							"        \"language_countries_id\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"image_url\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"images\": {",
+							"          \"type\": \"object\",",
+							"          \"properties\": {",
+							"            \"original\": {",
+							"              \"type\": \"string\"",
+							"            },",
+							"            \"thumbnail\": {",
+							"              \"type\": \"string\"",
+							"            },",
+							"            \"preview\": {",
+							"              \"type\": \"string\"",
+							"            }",
+							"          },",
+							"          \"required\": [",
+							"            \"original\",",
+							"            \"thumbnail\",",
+							"            \"preview\"",
+							"          ]",
+							"        },",
+							"        \"areas\": {",
+							"          \"type\": [\"array\", \"null\"]",
+							"        },",
+							"        \"language_country\": {",
+							"          \"type\": [\"integer\", \"null\"]",
+							"        },",
+							"        \"package\": {",
+							"          \"type\": [\"object\", \"null\"]",
+							"        },",
+							"      },",
+							"// If Response contains more properties then in Schema whose names are not listed in the \"properties\" keywords",
+							"\"additionalProperties\": false,",
+							"",
+							"      \"required\": [",
+							"        \"id\",",
+							"        \"age_ranges_id\",",
+							"        \"status\",",
+							"        \"url\",",
+							"        \"predefined_panel_id\",",
+							"        \"own_testers\",",
+							"        \"package_id\",",
+							"        \"testers_cnt\",",
+							"        \"hash\",",
+							"        \"progress\",",
+							"        \"language_countries_id\",",
+							"        \"image_url\",",
+							"        \"images\",",
+							"        \"areas\",",
+							"        \"language_country\",",
+							"        \"package\"",
+							"      ],",
+							"    },",
+							"    \"status\": {",
+							"      \"type\": \"integer\",",
+							"    }",
+							"  },",
+							"  \"required\": [",
+							"    \"test\",",
+							"    \"status\"",
+							"  ],",
+							"}",
+							"pm.test('Schema validation', () => {",
+							"    pm.expect(tv4.validate(jsonData, schema)).to.eql(true);",
+							"});",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{eut_host}}/api/v1/tests/{{test_id_img}}",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tests",
+						"{{test_id_img}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update. Put image-URL to Test-IMG",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// If both URL and Attachment are filled at the same time Attachment image would be taken to the next step and URL would be ignored",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", () => {pm.response.to.have.status(200)});",
+							"",
+							"// Т.к. добавляем к уже существующему IMG-тесту, то сверяем id из Response с эндпоинтом",
+							"// Если img загрузится некорректно, то image_url будет иметь значение null. Если там не null, то загрузка img прошла успешно",
+							"pm.test(`URL-image '${pm.environment.get('url_img')}' added to Test #${jsonData.test.id}`, function() {",
+							"    // pm.expect(jsonData.test).to.have.property('id');",
+							"    // pm.expect(jsonData.test.id).to.be.an('number');",
+							"    pm.expect(jsonData.test.id).to.eql(pm.collectionVariables.get('test_id_img'))",
+							"    pm.expect(jsonData.test.image_url).not.eql(null)",
+							"    pm.expect(jsonData.test.image_url).to.contain(pm.collectionVariables.get('test_id_img'))",
+							"    });",
+							"",
+							"// Check for Image Resized",
+							"// Засовываем в масив ключи объекта images",
+							"let arr = []",
+							"for(const key in jsonData.test.images){arr.push(key)}",
+							"// Проверяем наличие ключей в JSON Response в объекте 'images'. Перебераем массив на предмет наличия каждого ключа из массива в Response.",
+							"arr.forEach((el) => {",
+							"    pm.test(`Response \"images.${el}\" not null`, () => {",
+							"        pm.expect(jsonData.test.images).to.have.property(el).that.have.to.be.a('string')",
+							"    })",
+							"});",
+							"",
+							"pm.test(`Test hash is correct`, () => {",
+							"    pm.expect(jsonData.test.hash).eql(pm.collectionVariables.get('hash'))",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"url\" : \"{{url_img}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/tests/{{test_id_img}}",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tests",
+						"{{test_id_img}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all tests Draft/Active/Complete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"let req = pm.request.url.query.toObject()",
+							"",
+							"pm.test(`List of \"${req.status}\" tests recived` , function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Выводим status из URL ",
+							"console.log(\"Test status: \" + req.status);",
+							"",
+							"// Цикл, который выведет в консоль id тестов из массива test[] в Response",
+							"for (i in jsonData.test) {",
+							"    console.log(jsonData.test[i].id);",
+							"};",
+							"",
+							"// forEach(jsonData.test)",
+							"// console.log(jsonData.test.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{eut_host}}/api/v1/tests?status=draft",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tests"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "draft"
+						},
+						{
+							"key": "status",
+							"value": "active",
+							"disabled": true
+						},
+						{
+							"key": "status",
+							"value": "completed",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Test Deleted. ID: \" + pm.collectionVariables.get('test_id_img'), () => {\r",
+							"pm.response.to.have.status(200);\r",
+							"pm.expect(pm.response.json().status).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"console.log(`Test Deleted. ID: \" + ${pm.collectionVariables.get('test_id_img')}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{eut_host}}/api/v1/tests/{{test_id_img}}",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tests",
+						"{{test_id_img}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(`User \"${pm.environment.get(\"email_log\")}\" logouted`, () => {",
+							"pm.response.to.have.status(200);",
+							"pm.expect(pm.response.json().status).to.eql(200);",
+							"});",
+							"",
+							"console.log(`User \"${pm.environment.get(\"email_log\")}\" logouted\")`);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{eut_host}}/api/v1/logout",
+					"host": [
+						"{{eut_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{eut_log_bearer_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "email_log",
+			"value": "dev_test5@test.com",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "test_id_img",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_id_url",
+			"value": ""
+		},
+		{
+			"key": "hash",
+			"value": ""
+		},
+		{
+			"key": "eut_log_bearer_token",
+			"value": ""
+		},
+		{
+			"key": "email_reg",
+			"value": ""
+		},
+		{
+			"key": "eut_reg_bearer_token",
+			"value": ""
+		}
+	]
+}

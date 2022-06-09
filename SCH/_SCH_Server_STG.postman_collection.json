@@ -1,0 +1,538 @@
+{
+	"info": {
+		"_postman_id": "f5f87c97-b8d6-4f35-bd36-969a4a245933",
+		"name": "_SCH_Server_STG",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17406426"
+	},
+	"item": [
+		{
+			"name": "stg_Login User and create token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Logged in Success\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.collectionVariables.set(\"stgaccesstoken\", pm.response.json().data.access_token);",
+							"pm.test('Token placed to variable \"stgaccesstoken\"');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "email",
+						"value": "akrivoshey2007123@gmail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "password",
+						"value": "emp123",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"stg_project_owner@test.com\",\n\t\"password\":\"Pa$$w0rd!\"\n}"
+				},
+				"url": {
+					"raw": "https://datalayer.stg.fhlb.ch/api/v1/auth/login",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "akrivoshey2007@gmail.com",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "emp123",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "stg_Get the authenticated User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var searchJSON = JSON.parse(responseBody)",
+							"tests[\"Authenticated user recieved\"] = /users/.test(searchJSON.data.type)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{stgaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.stg.fhlb.ch/api/v1/auth/user?include=events",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"user"
+					],
+					"query": [
+						{
+							"key": "include",
+							"value": "events"
+						}
+					]
+				},
+				"description": "Get the authenticated User"
+			},
+			"response": []
+		},
+		{
+			"name": "stg_Get Organizations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Organizations list recieved\", () => {",
+							"    pm.expect(jsonData.data[0].type).to.eql('organizations');",
+							"    pm.expect(jsonData.data[0].attributes).to.be.an(\"object\");",
+							"    pm.expect(jsonData.data[0].attributes.id).to.be.a(\"string\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{stgaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.stg.fhlb.ch/api/v1/organizations/",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"organizations",
+						""
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "{{offset}}",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "{{limit}}",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "{{search}}",
+							"disabled": true
+						},
+						{
+							"key": "claimed",
+							"value": "{{claimed}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "stg_Get Project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var searchJSON = JSON.parse(responseBody)",
+							"tests[\"Projects list recieved\"] = /projects/.test(searchJSON.data[0].type)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{stgaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.stg.fhlb.ch/api/v1/projects/",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"projects",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200: Successfully logged out\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{stgaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.stg.fhlb.ch/api/v1/auth/logout",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"logout"
+					]
+				},
+				"description": "Logout user (Revoke the token)"
+			},
+			"response": []
+		},
+		{
+			"name": "stg_donation_ORG",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Donation Organization title on the page\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Meine Hundeorganisation + sdg - Donation\");",
+							"});",
+							"",
+							"pm.test(\"Donation Element on base\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Zahlungsmethode wählen\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "freihandlabor",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "d3v3l0p3r!access",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "dev_project_owner_org@test.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "Pa$$w0rd!",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://donation.stg.fhlb.ch/organizations/meine-hundeorganisation-sdg",
+					"protocol": "https",
+					"host": [
+						"donation",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"organizations",
+						"meine-hundeorganisation-sdg"
+					]
+				},
+				"description": "Gets Account Research Folder's Projects"
+			},
+			"response": []
+		},
+		{
+			"name": "stg_donation_PROJ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Donation Project title on the page\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.project.title).to.eql(\"SDG Project\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "freihandlabor",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "d3v3l0p3r!access",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "dev_project_owner_org@test.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "Pa$$w0rd!",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://donation.stg.fhlb.ch/projects/sdg-project",
+					"protocol": "https",
+					"host": [
+						"donation",
+						"stg",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"projects",
+						"sdg-project"
+					]
+				},
+				"description": "Gets Account Research Folder's Projects"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "devaccesstoken",
+			"value": ""
+		},
+		{
+			"key": "stgaccesstoken",
+			"value": ""
+		}
+	]
+}

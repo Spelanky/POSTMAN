@@ -1,0 +1,587 @@
+{
+	"info": {
+		"_postman_id": "cf4bafde-9f97-4124-8e6b-f284d31072b3",
+		"name": "_SCH_Server_DEV",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17406426"
+	},
+	"item": [
+		{
+			"name": "dev_Login User and create token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+							"",
+							"pm.test(\"Log in Success\", () => pm.expect(jsonData.success).to.eql(true));",
+							"",
+							"pm.collectionVariables.set(\"devaccesstoken\", pm.response.json().data.access_token);",
+							"pm.test('Token placed to collection variable \"devaccesstoken\"');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "email",
+						"value": "akrivoshey2007123@gmail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "password",
+						"value": "emp123",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"dev_project_owner_org@test.com\",\n\t\"password\":\"Pa$$w0rd!\"\n}"
+				},
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/auth/login",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "akrivoshey2007@gmail.com",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "emp123",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "dev_Get the authenticated User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+							"",
+							"pm.test(\"Authenticated user recieved\", () => pm.expect(pm.response.json().data.type).to.eql('users'));",
+							"",
+							"// Old method",
+							"// var searchJSON = JSON.parse(responseBody)",
+							"// tests[\"Authenticated user recieved\"] = /users/.test(searchJSON.data.type)",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{devaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/auth/user?include=events",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"user"
+					],
+					"query": [
+						{
+							"key": "include",
+							"value": "events"
+						}
+					]
+				},
+				"description": "Get the authenticated User"
+			},
+			"response": []
+		},
+		{
+			"name": "dev_Get Organizations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Organizations list recieved\", () => {",
+							"    pm.expect(jsonData.data[0].type).to.eql('organizations');",
+							"});",
+							"",
+							"// Old method",
+							"// const searchJSON = JSON.parse(responseBody)",
+							"// tests[\"Organizations list recieved\"] = /organizations/.test(searchJSON.data[0].type)",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{devaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/organizations/",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"organizations",
+						""
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "{{offset}}",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "{{limit}}",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "{{search}}",
+							"disabled": true
+						},
+						{
+							"key": "claimed",
+							"value": "{{claimed}}",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "dev_Get Project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"tests[\"Projects list recieved\"] = /projects/.test(jsonData.data[0].type)",
+							"",
+							"pm.test(\"Projects list recieved\", function () {",
+							"    pm.expect(jsonData.data[0].type).to.eql('projects');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{devaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/projects",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "dev_Get_Event by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"tests[\"Events list recieved\"] = /events/.test(jsonData.data.type)",
+							"",
+							"pm.test(\"Events list recieved\", () => pm.expect(jsonData.data.type).to.eql('events'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/events/112",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"112"
+					]
+				},
+				"description": "Get Event"
+			},
+			"response": []
+		},
+		{
+			"name": "dev_Logout user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+							"",
+							"pm.test(jsonData.message, () => {",
+							"        pm.expect(jsonData.message).eql(\"Successfully logged out\");",
+							"    })",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{devaccesstoken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://datalayer.dev.fhlb.ch/api/v1/auth/logout",
+					"protocol": "https",
+					"host": [
+						"datalayer",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"logout"
+					]
+				},
+				"description": "Logout user (Revoke the token)"
+			},
+			"response": []
+		},
+		{
+			"name": "dev_donation_ORG",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const $ = cheerio.load(pm.response.text());",
+							"",
+							"pm.test(\"Donation Organization Title on its place\", () => {",
+							"    pm.expect($('title').text()).to.eql(\"Ghostbusters Inc - StiftungSchweiz\");",
+							"})",
+							"",
+							"pm.test(\"Donation Payment widget on its place\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Betrag wählen\");",
+							"});",
+							"",
+							"//Неинформативный тест с тем же результатом",
+							"/*",
+							"pm.test(\"Donation Organization title on its place\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Goldmann International Foundation for Image and Communications, en liquidation - StiftungSchweiz\");",
+							"});",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "freihandlabor",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "d3v3l0p3r!access",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "dev_project_owner_org@test.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "Pa$$w0rd!",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://donation.dev.fhlb.ch/organizations/ghostbusters-inc",
+					"protocol": "https",
+					"host": [
+						"donation",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"organizations",
+						"ghostbusters-inc"
+					]
+				},
+				"description": "Gets Account Research Folder's Projects"
+			},
+			"response": []
+		},
+		{
+			"name": "dev_donation_PROJ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Donation Project Title on its place\", function () {",
+							"    pm.expect(jsonData.project.title).to.eql(\"SDG TEST PROJECT\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "d3v3l0p3r!access",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "freihandlabor",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "dev_project_owner_org@test.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "Pa$$w0rd!",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://donation.dev.fhlb.ch/projects/ghost-project",
+					"protocol": "https",
+					"host": [
+						"donation",
+						"dev",
+						"fhlb",
+						"ch"
+					],
+					"path": [
+						"projects",
+						"ghost-project"
+					]
+				},
+				"description": "Gets Account Research Folder's Projects"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "devaccesstoken",
+			"value": ""
+		}
+	]
+}
